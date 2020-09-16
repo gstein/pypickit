@@ -55,7 +55,7 @@ class PICkit:
     def write(self, cmd, *values):
         v = (cmd,) + values
         print('WRITE:', v)
-        return self.ep_out.write(data=v)
+        return self.ep_out.write(v)
 
     def read(self, amt):
         ### ignore AMT. read frames are always 64 bytes.

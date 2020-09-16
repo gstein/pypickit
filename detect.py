@@ -53,7 +53,7 @@ class PICkit:
         print('VERSION:', tuple(result)[:3])
 
     def write(self, cmd, *values):
-        v = (cmd,) + values
+        v = bytes((cmd,) + values)  # ensures all values in [0,255]
         print('WRITE:', v)
         return self.ep_out.write(v)
 
@@ -65,6 +65,8 @@ class PICkit:
 
 
 def set_vdd(pk, voltage, threshold):
+    # REFERENCE: CPICkitFunctions::SetVDDVoltage
+
     voltage = max(voltage, 2.5)
 
     # magic
@@ -80,8 +82,18 @@ def set_vdd(pk, voltage, threshold):
 
 
 def set_vpp(pk, voltage, threshold):
+    # REFERENCE: CPICkitFunctions::SetVppVoltage
+
+    # magic
     vppADC = voltage * 18.61
     fault = threshold * voltage * 1.61
+
+    return pk.write(
+        util.FWCMD_SETVPP,
+        0x40,  # cppValue
+        vppADC,
+        vFault,
+        )
 
 
 def detect(pk):

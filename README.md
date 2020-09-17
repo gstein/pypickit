@@ -17,7 +17,7 @@ or need some device data corrections that are contained in your `.dat`
 file, then this could be useful.
 
 It appears there are some recent device additions, updates, and corrections,
-managed over PICKitPlus project. `devfile.py` will produce a `.yaml` for
+managed over at the PICKitPlus project. `devfile.py` will produce a `.yaml` for
 use by this package. That project is located at:
 https://sourceforge.net/projects/pickit3plus/files/
 

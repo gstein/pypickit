@@ -9,7 +9,7 @@ import util
 
 
 def set_vdd(pk, voltage, threshold):
-    # REFERENCE: CPICkitFunctions::SetVDDVoltage
+    # REFERENCE: CPICkitFunctions::SetVDDVoltage(...)
 
     voltage = max(voltage, 2.5)
 
@@ -26,23 +26,22 @@ def set_vdd(pk, voltage, threshold):
 
 
 def set_vpp(pk, voltage, threshold):
-    # REFERENCE: CPICkitFunctions::SetVppVoltage
+    # REFERENCE: CPICkitFunctions::SetVppVoltage(...)
 
     # magic
     vppADC = voltage * 18.61
-    fault = threshold * voltage * 1.61
+    vFault = threshold * voltage * 1.61
 
     return pk.write(
         util.FWCMD_SETVPP,
         0x40,  # cppValue
-        vppADC,
-        vFault,
+        int(vppADC),
+        int(vFault),
         )
 
 
 def detect(pk):
     set_vdd(pk, voltage, 0.85)
-    return
 
     vpp = families[family].Vpp
     if vpp < 1.0:
@@ -65,3 +64,6 @@ def detect(pk):
 if __name__ == '__main__':
     pk = util.PICkit()
     #set_vdd(pk, 3.0, 0.85)
+
+    #with util.enable_MCU(pk):
+    #    print('DO SOMETHING')

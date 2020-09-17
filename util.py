@@ -1,7 +1,10 @@
 #!/usr/bin/python3
 
+import os.path
 import contextlib
+import marshal
 
+import yaml
 import usb.core
 
 
@@ -116,8 +119,14 @@ SCMD_JT2_GET_PE_RESP             = 0xB5
 SCMD_JT2_WAIT_PE_RESP            = 0xB4
 
 
+# Default filename for information about the PIC devices.
+DEFAULT_DEVFILE = 'PK2DeviceFile.yaml'
+
+
 class PICkit:
     def __init__(self):
+        self.default_speed = 0
+
         ### multiple programmers on the bus? f'it. assume one.
         self.device = usb.core.find(idVendor=ID_VENDOR,
                                     idProduct=ID_PRODUCT)
@@ -168,18 +177,87 @@ class PICkit:
                           )
 
     def vdd_on(self):
-        # REFERENCE: CPICkitFunctions::VddOn(void)
+        # REFERENCE: CPICkitFunctions::VddOn()
         ### NOTE: assume targetSelfPowered = False
         return self.run_scripts(SCMD_VDD_GND_OFF,
                                 SCMD_VDD_ON,
                                 )
 
     def vdd_off(self):
-        # REFERENCE: CPICkitFunctions::VddOff(void)
+        # REFERENCE: CPICkitFunctions::VddOff()
         ### NOTE: assume targetSelfPowered = False
         return self.run_scripts(SCMD_VDD_OFF,
                                 SCMD_VDD_GND_ON,
                                 )
+
+    def set_speed(self, speed=None):
+        # REFERENCE: CPICkitFunctions::SetProgrammingSpeed()
+        if speed is None:
+            speed = self.default_speed
+        ### blah
+
+    def set_vdd(self, voltage, threshold):
+        # REFERENCE: CPICkitFunctions::SetVDDVoltage()
+
+        voltage = max(voltage, 2.5)
+
+        ### magic. need explanation
+        ccp = int((voltage*32 + 10.5) * 64)
+        fault = min((threshold*voltage / 5) * 255, 210.0)
+
+        return self.write(
+            FWCMD_SETVDD,
+            ccp &  0x0FF,  # low-byte
+            ccp // 0x100,  # high-byte
+            int(fault),
+            )
+
+    def set_vpp(self, voltage, threshold):
+        # REFERENCE: CPICkitFunctions::SetVppVoltage()
+
+        ### magic. need explanation
+        vppADC = voltage * 18.61
+        vFault = threshold * voltage * 1.61
+
+        return self.write(
+            FWCMD_SETVPP,
+            0x40,  # cppValue
+            int(vppADC),
+            int(vFault),
+            )
+
+
+class Info:
+    def __init__(self, path=None):
+        if path is None:
+            path = os.path.join(os.path.dirname(__file__),
+                                DEFAULT_DEVFILE)
+
+        #print('DEVFILE:', path)
+        #import time ; t = time.time()
+        mpath = path + '.m'
+        if os.path.exists(mpath):
+            with open(mpath, 'rb') as mfp:
+                data = marshal.load(mfp)
+        else:
+            data = yaml.load(open(path))
+            #print('TIME:', time.time() - t)
+            try:
+                mfp = open(mpath, 'wb')
+            except IOError:
+                pass
+            else:
+                #import pprint ; pprint.pprint(data['info'])
+                marshal.dump(data, mfp)
+                mfp.close()
+        #print('TIME:', time.time() - t)
+
+        #print('DATA:', type(data))
+        #print('KEYS:', data.keys())
+        vars(self).update(data['info'])
+        self.families = data['families']
+        self.parts = data['parts']
+        self.scripts = data['scripts']
 
 
 @contextlib.contextmanager

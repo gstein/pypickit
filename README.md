@@ -8,7 +8,18 @@ and moved to a Python-based platform for future support.
 
 ### `devfile.py`
 
-TBD
+This tool can transform any device data file that you have, into a YAML
+file for consumption by `pypickit`.
+
+There is already a `PK2DeviceFile.yaml` provided in this repository,
+so you may not need to use this script. If you have some newer chips,
+or need some device data corrections that are contained in your `.dat`
+file, then this could be useful.
+
+It appears there are some recent device additions, updates, and corrections,
+managed over PICKitPlus project. `devfile.py` will produce a `.yaml` for
+use by this package. That project is located at:
+https://sourceforge.net/projects/pickit3plus/files/
 
 ### `detect.py`
 

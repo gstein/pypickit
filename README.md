@@ -18,7 +18,7 @@ file, then this could be useful.
 
 It appears there are some recent device additions, updates, and corrections,
 managed over at the PICKitPlus project. `devfile.py` will produce a `.yaml` for
-use by this `pypickit`. PICKitPlus is located at:
+use by `pypickit`. PICKitPlus is located at:
 https://sourceforge.net/projects/pickit3plus/files/
 
 ### `detect.py`

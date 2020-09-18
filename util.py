@@ -153,17 +153,17 @@ class PICkit:
         ### claim the interface?
 
         self.write(FWCMD_FIRMWARE_VERSION)
-        result = self.read(8)
+        result = self.read(3)
         ### check for bootloader mode
-        print('VERSION:', tuple(result)[:3])
+        print('VERSION:', tuple(result))
 
     def write(self, *values):
         v = bytes(flatten(values))  # ensures all values in [0,255]
-        print('WRITE:', v)
+        #print('WRITE:', v)
         #if v[0] != FWCMD_FIRMWARE_VERSION: return
         return self.ep_out.write(v)
 
-    def read(self, amt):
+    def read(self, amt=64):
         ### ignore AMT. read frames are always 64 bytes.
         ### what to do?
         assert amt <= 64
@@ -194,7 +194,9 @@ class PICkit:
         # REFERENCE: CPICkitFunctions::SetProgrammingSpeed()
         if speed is None:
             speed = self.default_speed
-        ### blah
+        self.run_scripts(SCMD_SET_ICSP_SPEED,
+                         speed,
+                         )
 
     def set_vdd(self, voltage, threshold):
         # REFERENCE: CPICkitFunctions::SetVDDVoltage()
